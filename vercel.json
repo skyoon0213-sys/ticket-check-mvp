@@ -3,5 +3,8 @@
   "framework": null,
   "buildCommand": null,
   "installCommand": "echo 'Static HTML: no build dependencies required'",
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "functions": {
+    "api/analyze.js": { "maxDuration": 60 }
+  }
 }
