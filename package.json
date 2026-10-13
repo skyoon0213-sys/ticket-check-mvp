@@ -1,0 +1,12 @@
+{
+  "name": "ticket-check-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "중고 티켓 거래 위험 신호 확인 MVP",
+  "allowScripts": {
+    "supabase": true
+  },
+  "devDependencies": {
+    "supabase": "2.120.0"
+  }
+}

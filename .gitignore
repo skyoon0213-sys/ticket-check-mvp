@@ -1,0 +1,10 @@
+node_modules/
+.vercel/
+.env
+.env.*
+!.env.example
+.DS_Store
+supabase/.temp/
+supabase/.branches/
+진행기록.md
+검증결과.md
