@@ -57,7 +57,10 @@ module.exports = async function handler(req, res) {
   const text = typeof body?.text === 'string' ? body.text.trim() : '';
   if (!text || text.length > 8000) return fail(400, '양도글이나 DM을 1~8,000자 사이로 입력해 주세요.');
   const directOpenAI = Boolean(process.env.OPENAI_API_KEY);
-  const apiKey = process.env.OPENAI_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+  // Vercel supplies OIDC in the request header at runtime, not the build-time env.
+  const oidcToken = process.env.VERCEL === '1' && typeof req.headers['x-vercel-oidc-token'] === 'string'
+    ? req.headers['x-vercel-oidc-token'] : undefined;
+  const apiKey = process.env.OPENAI_API_KEY || process.env.AI_GATEWAY_API_KEY || oidcToken || process.env.VERCEL_OIDC_TOKEN;
   if (!apiKey) return fail(503, 'AI 분석 연결을 준비 중이에요. 잠시 후 다시 확인해 주세요.');
   const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
   if (!allowRequest(ip)) { res.setHeader('Retry-After', '60'); return fail(429, '잠깐만요. 1분 뒤에 다시 분석해 주세요.'); }
