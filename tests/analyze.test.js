@@ -40,7 +40,7 @@ test('sends the text to Responses API, keeps the key server-side, and validates 
   const bad = response(); await handler(request({ text: input }), bad); assert.equal(bad.code, 502); assert.equal(bad.body.signals, undefined);
 });
 test('AI quota errors are reported as errors, not a safe-trade result', async () => {
-  global.fetch = async () => ({ ok: false, status: 429 });
+  global.fetch = async () => ({ ok: false, status: 429, json: async () => ({ error: { code: 'rate_limit_exceeded' } }) });
   const res = response(); await handler(request({ text: '양도할 티켓이 있어요.' }), res);
   assert.equal(res.code, 503); assert.match(res.body.error, /한도/); assert.equal(res.body.level, undefined);
 });
