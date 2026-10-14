@@ -62,3 +62,10 @@ test('uses the runtime OIDC request header on Vercel without a browser API key',
     if (previousVercel === undefined) delete process.env.VERCEL; else process.env.VERCEL = previousVercel;
   }
 });
+test('verification-required accounts receive a setup message and no analysis', async () => {
+  process.env.OPENAI_API_KEY = 'test-only-key';
+  global.fetch = async () => ({ ok: false, status: 403, json: async () => ({ error: { code: 'customer_verification_required' } }) });
+  const res = response();
+  await handler(request({ text: '티켓 양도글을 확인하고 싶어요.' }, { headers: { 'content-type': 'application/json', 'x-forwarded-for': '192.0.2.3' } }), res);
+  assert.equal(res.code, 503); assert.match(res.body.error, /계정 인증/); assert.equal(res.body.signals, undefined);
+});

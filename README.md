@@ -20,8 +20,10 @@ Vercel은 GitHub `main` 브랜치 푸시로 자동 배포합니다. CLI 직접 �
 
 결과에는 원문 인용, 확인 이유, 판매자에게 물어볼 질문, 미확인 정보가 포함됩니다. AI 오류나 키 미등록 상태를 안전한 거래 결과로 바꾸지 않습니다. 입력은 8,000자, 결과는 최대 5개 위험 신호로 제한합니다. AI 요청에는 `store: false`를 사용하고, 신청 표에는 분석 입력을 저장하지 않습니다.
 
-서버 함수가 없으므로 `python -m http.server`만으로는 AI 분석이 동작하지 않습니다. 배포한 Vercel 사이트에서 사용합니다.
+일반 정적 미리보기 서버는 API를 실행하지 않으므로 `python -m http.server`만으로는 AI 분석이 동작하지 않습니다. 배포한 Vercel 사이트에서 사용합니다.
 
 검증: `node --test tests/analyze.test.js` (외부 AI 호출을 대체한 서버 동작 테스트). 실제 AI 응답은 배포한 사이트에서 별도로 확인합니다. AI Gateway 사용은 해당 계정의 이용 가능 크레딧과 한도에 따릅니다. 크레딧 충전이나 결제 설정은 자동으로 변경하지 않습니다.
+
+AI Gateway가 `customer_verification_required`를 반환하면 계정 소유자가 Gateway의 무료 크레딧 인증 절차를 직접 완료해야 합니다. 또는 유효한 `OPENAI_API_KEY`를 서버 환경변수에 등록한 뒤 새 Git 배포로 직접 OpenAI 연결을 사용할 수 있습니다.
 
 참고: [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses), [Vercel Node.js Functions](https://vercel.com/docs/functions/runtimes/node-js).

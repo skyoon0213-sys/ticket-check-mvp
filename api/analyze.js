@@ -81,6 +81,7 @@ module.exports = async function handler(req, res) {
     if (!response.ok) {
       const details = await response.json().catch(() => ({}));
       console.warn('AI_UPSTREAM_ERROR', response.status, String(details.error?.code || details.error?.type || 'unknown'));
+      if (details.error?.code === 'customer_verification_required') return fail(503, 'AI 서비스 계정 인증을 기다리고 있어요. 인증이 완료되면 분석을 사용할 수 있어요.');
       if (response.status === 429) return fail(503, 'AI 사용 한도에 도달했어요. 잠시 후 다시 확인해 주세요.');
       return fail(502, 'AI 분석에 연결하지 못했어요. 잠시 후 다시 눌러 주세요.');
     }
