@@ -44,3 +44,21 @@ test('AI quota errors are reported as errors, not a safe-trade result', async ()
   const res = response(); await handler(request({ text: '양도할 티켓이 있어요.' }), res);
   assert.equal(res.code, 503); assert.match(res.body.error, /한도/); assert.equal(res.body.level, undefined);
 });
+test('uses the runtime OIDC request header on Vercel without a browser API key', async () => {
+  const previousKey = process.env.OPENAI_API_KEY, previousVercel = process.env.VERCEL;
+  delete process.env.OPENAI_API_KEY; process.env.VERCEL = '1';
+  let call;
+  const output = { level: 'check', summary: '티켓 전달 방법도 확인해 주세요.', signals: [], missing_information: ['전달 방법'], next_steps: [] };
+  global.fetch = async (url, options) => { call = { url, options }; return { ok: true, json: async () => ({ status: 'completed', output: [{ content: [{ type: 'output_text', text: JSON.stringify(output) }] }] }) }; };
+  try {
+    const res = response();
+    await handler(request({ text: '예매 내역을 확인한 뒤 양도받고 싶어요.' }, { headers: { 'content-type': 'application/json', 'x-forwarded-for': '192.0.2.2', 'x-vercel-oidc-token': 'test-only-oidc' } }), res);
+    assert.equal(res.code, 200); assert.equal(call.url, 'https://ai-gateway.vercel.sh/v1/responses');
+    assert.equal(call.options.headers.Authorization, 'Bearer test-only-oidc');
+    assert.equal(JSON.parse(call.options.body).model, 'openai/gpt-5-mini');
+    assert.ok(!JSON.stringify(res.body).includes('test-only-oidc'));
+  } finally {
+    if (previousKey === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = previousKey;
+    if (previousVercel === undefined) delete process.env.VERCEL; else process.env.VERCEL = previousVercel;
+  }
+});

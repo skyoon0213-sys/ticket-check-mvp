@@ -79,6 +79,8 @@ module.exports = async function handler(req, res) {
       })
     });
     if (!response.ok) {
+      const details = await response.json().catch(() => ({}));
+      console.warn('AI_UPSTREAM_ERROR', response.status, String(details.error?.code || details.error?.type || 'unknown'));
       if (response.status === 429) return fail(503, 'AI 사용 한도에 도달했어요. 잠시 후 다시 확인해 주세요.');
       return fail(502, 'AI 분석에 연결하지 못했어요. 잠시 후 다시 눌러 주세요.');
     }
