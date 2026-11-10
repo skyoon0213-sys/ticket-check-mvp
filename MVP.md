@@ -194,3 +194,7 @@ GitHub 공개 저장소 `skyoon0213-sys/ticket-check-mvp`와 Vercel `bible5/tick
 결제·안전거래 중개는 현재 범위에 넣지 않는다. 현재의 핵심 가치는 **입금 전에 확인할 근거와 다음 행동을 정리하는 것**이다.
 
 참고: [Gemini 가격](https://ai.google.dev/gemini-api/docs/pricing), [무료 서비스 이용 조건](https://ai.google.dev/gemini-api/terms), [Groq 무료 등급](https://console.groq.com/docs/billing-faqs), [OpenRouter 무료 모델](https://openrouter.ai/collections/free-models).
+
+### 실제 연결 검증 결과
+
+2026-11-10 새 무료 프로젝트 키를 Vercel production의 비밀 환경변수로 등록하고 GitHub main 푸시로 배포했다. **실제 AI 분석은 아직 작동하지 않는다.** Google이 `401 UNAUTHENTICATED / ACCESS_TOKEN_TYPE_UNSUPPORTED`를 반환했다. 전체 키 길이와 공백 여부를 확인했으며, 두 무료 모델의 GenerateContent와 최신 Interactions 경로에서도 같은 인증 오류가 재현됐다. 유료 결제를 활성화하지 않았다. 화면에서 인증 오류를 안내하며 가짜 AI 결과를 만들지 않는다. 서버 로직 테스트 5개와 기존 기본 문구 분석 UI는 통과했으나 실제 AI 성공 응답 검증은 미완료다.

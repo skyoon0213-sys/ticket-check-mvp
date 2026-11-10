@@ -66,8 +66,17 @@ async function handler(req, res) {
       }), signal: AbortSignal.timeout(25000)
     });
     if (!response.ok) {
+      // Only status codes go to server logs. Never log the request, key, or provider message.
+      let providerStatus = 'UNKNOWN';
+      try {
+        const failure = await response.json();
+        const code = failure.error?.status;
+        if (typeof code === 'string' && /^[A-Z_]{1,50}$/.test(code)) providerStatus = code;
+      } catch {}
+      console.warn('gemini_request_failed', response.status, providerStatus);
       const status = response.status === 429 ? 429 : 503;
-      return res.status(status).json({ error: status === 429 ? '무료 사용 한도에 도달했어요. 나중에 다시 시도해 주세요. 유료 서비스로 전환하지 않아요.' : 'AI에 연결하지 못했어요. 무료 등급·키 설정을 확인해야 해요. 기본 문구 확인을 이용해 주세요.' });
+      const message = response.status === 401 ? 'Google에서 API 키 인증을 거절해 AI 테스트를 이용할 수 없어요. 연결을 확인 중이에요. 기본 문구 확인을 이용해 주세요.' : status === 429 ? '무료 사용 한도에 도달했어요. 나중에 다시 시도해 주세요. 유료 서비스로 전환하지 않아요.' : 'AI에 연결하지 못했어요. 무료 등급·키 설정을 확인해야 해요. 기본 문구 확인을 이용해 주세요.';
+      return res.status(status).json({ error: message });
     }
     const result = await response.json();
     const candidate = result.candidates?.[0];
