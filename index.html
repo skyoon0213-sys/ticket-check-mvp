@@ -39,10 +39,11 @@ body{background-color:var(--paper);background-image:radial-gradient(ellipse at 1
 @media(prefers-reduced-motion:reduce){.btn,.tabs button{transition:none}.btn:hover,.tabs button:hover{transform:none}}
 
 body{font-family:'IBM Plex Sans KR',-apple-system,BlinkMacSystemFont,sans-serif}.brand,h2,h3,.pass-title,.feature h3,.counter{font-family:'Black Han Sans','IBM Plex Sans KR',sans-serif;font-weight:400}.gig-title,.pass-stub strong{font-family:Impact,'Arial Black',sans-serif}.gig-meta h2{line-height:1.45}.pass-title{letter-spacing:-.5px}.brand{letter-spacing:-1px}input,textarea,select{font-family:'IBM Plex Sans KR',sans-serif}button{font-family:'IBM Plex Sans KR',sans-serif}.result h3{line-height:1.55}
+.home-brand{border:0;padding:0;background:none;color:var(--ink);text-align:left}h2[tabindex="-1"]:focus{outline:none}
 </style>
 </head>
 <body>
-<header><div class="brand"><span class="mark" aria-hidden="true">✓</span>티켓체크</div><div class="header-right"><span class="pill">BETA · 체험 버전</span><button class="text-btn small" id="logout" hidden>로그아웃</button></div></header>
+<header><button class="brand home-brand" id="brand-home" aria-label="티켓체크 첫 화면"><span class="mark" aria-hidden="true">✓</span>티켓체크</button><div class="header-right"><span class="pill">BETA · 체험 버전</span><button class="text-btn small" id="logout" hidden>로그아웃</button></div></header>
 <main class="wrap">
 <nav class="steps" aria-label="이용 단계"><span class="active" id="step1"><b>01</b> 시작하기</span><span id="step2"><b>02</b> 거래 확인</span><span id="step3"><b>03</b> 출시 알림</span></nav>
 <section id="landing">
@@ -70,7 +71,7 @@ let signupSubmitting = false;
 const screens=['landing','login','tools','apply'];let loggedIn=false,currentUser=null,authChecking=true,authRequest=0;
 const loginClient=window.supabase?.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{flowType:'pkce',autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 function show(screen){if(['tools','apply'].includes(screen)&&!loggedIn)screen='login';screens.forEach(id=>$(id).hidden=id!==screen);['step1','step2','step3'].forEach((id,i)=>$(id).classList.toggle('active',i===(screen==='tools'?1:screen==='apply'?2:0)));$('logout').hidden=!loggedIn;window.scrollTo({top:0,behavior:'instant'});const focus={login:'login-title',tools:'tools-title',apply:'apply-title'}[screen];if(focus)$(focus).focus();}
-$('start').onclick=()=>show(loggedIn?'tools':'login');$('back-home').onclick=()=>show('landing');
+$('brand-home').onclick=()=>show('landing');$('start').onclick=()=>show(loggedIn?'tools':'login');$('back-home').onclick=()=>show('landing');
 function setUser(user){currentUser=user;loggedIn=!!user;$('logout').hidden=!loggedIn;if(!loggedIn&&(!$('tools').hidden||!$('apply').hidden))show('login');}
 async function refreshAuth(){
   const request=++authRequest;authChecking=true;$('google-login').disabled=true;
