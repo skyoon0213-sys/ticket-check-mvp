@@ -205,3 +205,8 @@ GitHub 공개 저장소 `skyoon0213-sys/ticket-check-mvp`와 Vercel `bible5/tick
 Google 인증 실패 후 Groq Free ($0) 계정에 30일짜리 테스트 키를 생성했다. `GROQ_API_KEY`는 Vercel production 비밀 환경변수로 등록하고, `AI_PROVIDER=groq`로 명시적으로 선택한다. `openai/gpt-oss-20b` 모델을 사용하며 자동 제공자 전환은 없다. 입력은 Groq로 전송한다는 안내로 변경한다. 가상 대화 전용·개인정보 차단·원문 근거 확인은 그대로 적용한다. 서버 로직 테스트는 총 6개 통과했으며 실제 Groq 응답 시험은 배포 후 확인한다.
 
 [Groq 데이터 처리 안내](https://console.groq.com/docs/your-data), [Groq 무료 플랜 안내](https://console.groq.com/docs/billing-faqs).
+
+
+### Groq 실제 응답 검증 완료
+
+2026-11-10 공개 주소의 `/api/analyze`에 개인정보 없는 가상 대화를 보내 HTTP 200을 받았다. 응답 제공자는 Groq, 모델은 `openai/gpt-oss-20b`였다. 입력에 있는 입금 재촉·인증 지연 문구, 확인 이유·질문, 미확인 항목이 반환됐고 모든 근거 인용이 실제 입력 안에 있는지 검증했다. 인증 증빙과 실제 티켓 전달을 혼동하지 않도록 안내를 보완했다. AI 의견은 틀릴 수 있으며 사기 판정이나 판매자 검증으로 사용하지 않는다. 키는 2026-12-10 만료되므로 계속 시험하려면 만료 전에 서버 키를 교체한다. Google 연결 성공을 뜻하지 않으며 현재 제공자는 명시적으로 선택한 Groq다.
