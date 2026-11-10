@@ -65,3 +65,21 @@ test('successful model output is parsed and ungrounded quotes are removed', asyn
     if (oldKey === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = oldKey;
   }
 });
+test('Groq requires explicit selection and uses its server key with the same evidence checks', async () => {
+  const oldFetch = global.fetch, oldProvider = process.env.AI_PROVIDER, oldKey = process.env.GROQ_API_KEY;
+  process.env.AI_PROVIDER = 'groq'; process.env.GROQ_API_KEY = 'test-groq-placeholder';
+  global.fetch = async (url, options) => {
+    assert.equal(url, 'https://api.groq.com/openai/v1/chat/completions');
+    assert.equal(options.headers.Authorization, 'Bearer test-groq-placeholder');
+    assert.equal(JSON.parse(options.body).model, 'openai/gpt-oss-20b');
+    return { ok: true, json: async () => ({ choices: [{ finish_reason: 'stop', message: { content: '{"signals":[],"missing":["티켓 전달 방법"]}' } }] }) };
+  };
+  try {
+    const result = await request({ fictionalTest: true, text: '판매자: 인증은 입금 전에 보여 드릴 수 있어요.' }, { 'x-forwarded-for': 'test-groq' });
+    assert.equal(result.status, 200); assert.equal(result.data.provider, 'Groq'); assert.equal(result.data.signals.length, 0);
+  } finally {
+    global.fetch = oldFetch;
+    if (oldProvider === undefined) delete process.env.AI_PROVIDER; else process.env.AI_PROVIDER = oldProvider;
+    if (oldKey === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = oldKey;
+  }
+});

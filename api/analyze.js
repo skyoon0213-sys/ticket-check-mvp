@@ -23,13 +23,13 @@ quote는 입력에 실제로 존재하는 문장을 그대로 짧게 인용한�
 function hasPrivateData(text) {
   return /[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:\+82[-\s]?)?01[016789][-\s]?\d{3,4}[-\s]?\d{4}|\d[\d -]{8,}\d|https?:\/\/|@[a-zA-Z0-9_]{2,}/i.test(text);
 }
-function normalizeResult(data, text) {
+function normalizeResult(data, text, provider = 'Gemini') {
   if (!data || !Array.isArray(data.signals) || !Array.isArray(data.missing)) throw new Error('invalid-result');
   const signals = data.signals.slice(0, 5).filter(s => s &&
     ['quote', 'reason', 'question'].every(k => typeof s[k] === 'string' && s[k].trim() && s[k].length <= 500) &&
     text.includes(s.quote));
   const missing = data.missing.filter(x => typeof x === 'string' && x.trim() && x.length <= 300).slice(0, 4);
-  return { provider: 'Gemini', model: MODEL, signals, missing };
+  return { provider, model: provider === 'Groq' ? 'openai/gpt-oss-20b' : MODEL, signals, missing };
 }
 
 async function handler(req, res) {
@@ -48,7 +48,10 @@ async function handler(req, res) {
   }
   const text = body.text.trim();
   if (hasPrivateData(text)) return res.status(400).json({ error: '이메일·전화번호·계좌번호·아이디·링크를 빼고 가상 대화만 입력해 주세요.' });
-  if (!process.env.GEMINI_API_KEY) return res.status(503).json({ error: 'AI 테스트 준비 중이에요. 서버에 무료 API 키를 연결해야 해요. 기본 문구 확인은 이용할 수 있어요.' });
+  // Provider changes are an explicit deployment setting, never an automatic fallback.
+  const provider = process.env.AI_PROVIDER === 'groq' ? 'Groq' : 'Gemini';
+  const apiKey = provider === 'Groq' ? process.env.GROQ_API_KEY : process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.status(503).json({ error: 'AI 테스트 준비 중이에요. 서버에 무료 API 키를 연결해야 해요. 기본 문구 확인은 이용할 수 있어요.' });
   const now = Date.now();
   for (const [key, until] of recentRequests) if (until <= now) recentRequests.delete(key);
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
@@ -56,6 +59,23 @@ async function handler(req, res) {
   if (recentRequests.size >= 2000) return res.status(429).json({ error: '테스트 요청이 많아요. 잠시 후 다시 시도해 주세요.' });
   recentRequests.set(ip, now + 30000);
   try {
+    if (provider === 'Groq') {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey },
+        body: JSON.stringify({ model: 'openai/gpt-oss-20b', reasoning_effort: 'low', max_completion_tokens: 3000,
+          response_format: { type: 'json_object' }, messages: [
+            { role: 'system', content: instruction + '\n반드시 JSON만 반환한다. 출력 스키마: ' + JSON.stringify(schema) },
+            { role: 'user', content: text }
+          ] }), signal: AbortSignal.timeout(25000)
+      });
+      if (!response.ok) {
+        console.warn('groq_request_failed', response.status);
+        return res.status(response.status === 429 ? 429 : 503).json({ error: response.status === 429 ? '무료 사용 한도에 도달했어요. 나중에 다시 시도해 주세요. 유료 서비스로 전환하지 않아요.' : 'AI에 연결하지 못했어요. 무료 등급과 서버 키 설정을 확인해야 해요. 기본 문구 확인을 이용해 주세요.' });
+      }
+      const result = await response.json();
+      if (result.choices?.[0]?.finish_reason !== 'stop') throw new Error('incomplete-result');
+      return res.status(200).json(normalizeResult(JSON.parse(result.choices[0].message.content), text, provider));
+    }
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
       body: JSON.stringify({

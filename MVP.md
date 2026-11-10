@@ -198,3 +198,10 @@ GitHub 공개 저장소 `skyoon0213-sys/ticket-check-mvp`와 Vercel `bible5/tick
 ### 실제 연결 검증 결과
 
 2026-11-10 새 무료 프로젝트 키를 Vercel production의 비밀 환경변수로 등록하고 GitHub main 푸시로 배포했다. **실제 AI 분석은 아직 작동하지 않는다.** Google이 `401 UNAUTHENTICATED / ACCESS_TOKEN_TYPE_UNSUPPORTED`를 반환했다. 전체 키 길이와 공백 여부를 확인했으며, 두 무료 모델의 GenerateContent와 최신 Interactions 경로에서도 같은 인증 오류가 재현됐다. 유료 결제를 활성화하지 않았다. 화면에서 인증 오류를 안내하며 가짜 AI 결과를 만들지 않는다. 서버 로직 테스트 5개와 기존 기본 문구 분석 UI는 통과했으나 실제 AI 성공 응답 검증은 미완료다.
+
+
+### Groq 무료 대안 연결
+
+Google 인증 실패 후 Groq Free ($0) 계정에 30일짜리 테스트 키를 생성했다. `GROQ_API_KEY`는 Vercel production 비밀 환경변수로 등록하고, `AI_PROVIDER=groq`로 명시적으로 선택한다. `openai/gpt-oss-20b` 모델을 사용하며 자동 제공자 전환은 없다. 입력은 Groq로 전송한다는 안내로 변경한다. 가상 대화 전용·개인정보 차단·원문 근거 확인은 그대로 적용한다. 서버 로직 테스트는 총 6개 통과했으며 실제 Groq 응답 시험은 배포 후 확인한다.
+
+[Groq 데이터 처리 안내](https://console.groq.com/docs/your-data), [Groq 무료 플랜 안내](https://console.groq.com/docs/billing-faqs).
