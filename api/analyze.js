@@ -1,4 +1,5 @@
 'use strict';
+const { verifyUser } = require('../lib/auth.cjs');
 
 // This endpoint is for fictional test conversations only. Keep the key in Vercel.
 const MODEL = 'gemini-2.5-flash-lite';
@@ -54,6 +55,8 @@ async function handler(req, res) {
   const provider = process.env.AI_PROVIDER === 'groq' ? 'Groq' : 'Gemini';
   const apiKey = provider === 'Groq' ? process.env.GROQ_API_KEY : process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(503).json({ error: 'AI 테스트 준비 중이에요. 서버에 무료 API 키를 연결해야 해요. 기본 문구 확인은 이용할 수 있어요.' });
+  const auth = await verifyUser(req);
+  if (auth.status !== 200) return res.status(auth.status).json({ error: auth.error });
   const now = Date.now();
   for (const [key, until] of recentRequests) if (until <= now) recentRequests.delete(key);
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';

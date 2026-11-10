@@ -2,11 +2,18 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const handler = require('../api/analyze');
 
-function request(body, headers = {}) {
-  return new Promise(resolve => {
-    const res = { setHeader() {}, status(code) { this.code = code; return this; }, json(data) { resolve({ status: this.code, data }); } };
-    handler({ method: 'POST', headers, body }, res);
-  });
+async function request(body, headers = {}) {
+  const previousFetch = global.fetch;
+  global.fetch = async (url, options) => {
+    if (url === require('../lib/auth.cjs').AUTH_URL) return { ok: true, status: 200, json: async () => ({ id: 'test-user' }) };
+    return previousFetch(url, options);
+  };
+  let result;
+  const res = { setHeader() {}, status(code) { this.code = code; return this; }, json(data) { result = { status: this.code, data }; } };
+  try {
+    await handler({ method: 'POST', headers: { authorization: 'Bearer test-session-token-for-unit-tests', ...headers }, body }, res);
+    return result;
+  } finally { global.fetch = previousFetch; }
 }
 test('requires explicit fictional-text confirmation; rejects identifiable text before calling AI', async () => {
   assert.equal((await request({ text: '지금 입금해 주세요. 인증은 입금 후 해요.' })).status, 400);
