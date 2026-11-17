@@ -39,11 +39,11 @@ body{background-color:var(--paper);background-image:radial-gradient(ellipse at 1
 @media(prefers-reduced-motion:reduce){.btn,.tabs button{transition:none}.btn:hover,.tabs button:hover{transform:none}}
 
 body{font-family:'IBM Plex Sans KR',-apple-system,BlinkMacSystemFont,sans-serif}.brand,h2,h3,.pass-title,.feature h3,.counter{font-family:'Black Han Sans','IBM Plex Sans KR',sans-serif;font-weight:400}.gig-title,.pass-stub strong{font-family:Impact,'Arial Black',sans-serif}.gig-meta h2{line-height:1.45}.pass-title{letter-spacing:-.5px}.brand{letter-spacing:-1px}input,textarea,select{font-family:'IBM Plex Sans KR',sans-serif}button{font-family:'IBM Plex Sans KR',sans-serif}.result h3{line-height:1.55}
-.home-brand{border:0;padding:0;background:none;color:#cf4520;text-align:left}h2[tabindex="-1"]:focus{outline:none}
+.home-brand{border:0;padding:0;background:none;color:#cf4520;text-align:left}.brand-title{font-family:Impact,'Arial Narrow','Arial Black',sans-serif;font-weight:950;line-height:.98;letter-spacing:-.3px;transform:skew(-5deg);white-space:nowrap;text-shadow:.3px 0 currentColor,-.3px 0 currentColor}h2[tabindex="-1"]:focus{outline:none}
 </style>
 </head>
 <body>
-<header><button class="brand home-brand" id="brand-home" aria-label="티켓체크 첫 화면"><span class="mark" aria-hidden="true">✓</span>티켓체크</button><div class="header-right"><span class="pill">BETA · 체험 버전</span><button class="text-btn small" id="logout" hidden>로그아웃</button></div></header>
+<header><button class="brand home-brand" id="brand-home" aria-label="티켓체크 첫 화면"><span class="mark" aria-hidden="true">✓</span><span class="brand-title" lang="en">TICKET CHECK</span></button><div class="header-right"><span class="pill">BETA · 체험 버전</span><button class="text-btn small" id="logout" hidden>로그아웃</button></div></header>
 <main class="wrap">
 <nav class="steps" aria-label="이용 단계"><span class="active" id="step1"><b>01</b> 시작하기</span><span id="step2"><b>02</b> 거래 확인</span><span id="step3"><b>03</b> 출시 알림</span></nav>
 <section id="landing">
